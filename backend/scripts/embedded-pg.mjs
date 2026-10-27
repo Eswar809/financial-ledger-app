@@ -1,6 +1,7 @@
-import { EmbeddedPostgres } from 'embedded-postgres';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import EmbeddedPostgres from 'embedded-postgres';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,9 +12,31 @@ const USER = 'ledger';
 const PASSWORD = 'ledger_dev_password';
 const DB = 'ledger';
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function clearStaleServer() {
+  const pidFile = path.join(DATA_DIR, 'postmaster.pid');
+  if (!fs.existsSync(pidFile)) return;
+  const pid = parseInt(fs.readFileSync(pidFile, 'utf8').split('\n')[0], 10);
+  if (pid) {
+    try {
+      const { execSync } = await import('child_process');
+      if (process.platform === 'win32') {
+        execSync(`taskkill /pid ${pid} /f /t`, { stdio: 'ignore' });
+      } else {
+        process.kill(pid, 'SIGKILL');
+      }
+      await sleep(1500);
+    } catch {}
+  }
+  try { fs.unlinkSync(pidFile); } catch {}
+}
+
 async function run() {
   console.log(`Starting embedded PostgreSQL on port ${PORT}...`);
   console.log(`Data directory: ${DATA_DIR}`);
+
+  await clearStaleServer();
 
   const pg = new EmbeddedPostgres({
     databaseDir: DATA_DIR,
