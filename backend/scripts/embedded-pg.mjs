@@ -48,7 +48,7 @@ async function run() {
 
   try {
     await pg.initialise();
-  } catch (err: any) {
+  } catch (err) {
     // Already initialised is fine
     console.log('Database already initialized or notice:', err.message);
   }
@@ -59,7 +59,7 @@ async function run() {
   try {
     await pg.createDatabase(DB);
     console.log(`Created database "${DB}"`);
-  } catch (err: any) {
+  } catch (err) {
     console.log(`Database "${DB}" ready.`);
   }
 

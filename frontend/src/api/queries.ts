@@ -37,6 +37,17 @@ export function useAccountTransactions(
   });
 }
 
+/** Global ledger across all accounts (dashboard overview). */
+export function useAllTransactions(
+  params: { page?: number; limit?: number; type?: 'credit' | 'debit' } = {},
+) {
+  return useQuery({
+    queryKey: ['transactions', 'all', params],
+    queryFn: () => api.getTransactions(params),
+    refetchInterval: 3000,
+  });
+}
+
 export function useCreateAccount() {
   const queryClient = useQueryClient();
   return useMutation({

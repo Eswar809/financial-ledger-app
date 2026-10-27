@@ -52,6 +52,19 @@ export const api = {
   },
 
   // Transactions
+  getTransactions: async (
+    params: { page?: number; limit?: number; type?: 'credit' | 'debit'; account_id?: string } = {},
+  ) => {
+    const searchParams = new URLSearchParams();
+    if (params.page) searchParams.set('page', params.page.toString());
+    if (params.limit) searchParams.set('limit', params.limit.toString());
+    if (params.type) searchParams.set('type', params.type);
+    if (params.account_id) searchParams.set('account_id', params.account_id);
+
+    const qs = searchParams.toString();
+    return await request<Transaction[]>(`/transactions${qs ? `?${qs}` : ''}`);
+  },
+
   getAccountTransactions: async (
     accountId: string,
     params: { page?: number; limit?: number; type?: 'credit' | 'debit' } = {},
