@@ -42,3 +42,10 @@ export const accountResponseSchema = z.object({
 });
 
 export type AccountDto = z.infer<typeof accountResponseSchema>;
+
+export const listAccountsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export type ListAccountsQuery = z.infer<typeof listAccountsQuerySchema>;

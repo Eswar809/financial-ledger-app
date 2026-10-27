@@ -9,6 +9,7 @@ import {
   accountParamsSchema,
   accountResponseSchema,
   createAccountBodySchema,
+  listAccountsQuerySchema,
 } from './schemas.js';
 import { AccountsService } from './service.js';
 
@@ -48,20 +49,28 @@ export async function accountsRoutes(fastify: FastifyInstance) {
     {
       schema: {
         tags: ['Accounts'],
-        summary: 'List all accounts',
+        summary: 'List accounts with pagination',
+        querystring: listAccountsQuerySchema,
         response: {
           200: z.object({
             success: z.literal(true),
             data: z.array(accountResponseSchema),
+            meta: z.object({
+              total: z.number(),
+              page: z.number(),
+              limit: z.number(),
+              total_pages: z.number(),
+            }),
           }),
         },
       },
     },
-    async () => {
-      const accounts = await service.listAccounts();
+    async (request) => {
+      const result = await service.listAccounts(request.query);
       return {
         success: true as const,
-        data: accounts,
+        data: result.items,
+        meta: result.meta,
       };
     },
   );

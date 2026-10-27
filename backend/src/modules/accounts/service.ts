@@ -1,8 +1,9 @@
 import { Kysely, sql } from 'kysely';
 import type { Database } from '../../db/schema.js';
 import { NotFoundError } from '../../lib/errors.js';
+import { buildPaginationMeta, type PaginatedResult } from '../../lib/pagination.js';
 import { toAccountDto } from './mapper.js';
-import type { AccountDto, CreateAccountBody } from './schemas.js';
+import type { AccountDto, CreateAccountBody, ListAccountsQuery } from './schemas.js';
 
 export class AccountsService {
   constructor(private readonly db: Kysely<Database>) {}
@@ -54,14 +55,30 @@ export class AccountsService {
     return toAccountDto(account);
   }
 
-  async listAccounts(): Promise<AccountDto[]> {
-    const rows = await this.db
-      .selectFrom('accounts')
-      .selectAll()
-      .orderBy('created_at', 'desc')
-      .orderBy('id', 'desc')
-      .execute();
+  async listAccounts(query: ListAccountsQuery): Promise<PaginatedResult<AccountDto>> {
+    const { page, limit } = query;
+    const offset = (page - 1) * limit;
 
-    return rows.map(toAccountDto);
+    const [countResult, rows] = await Promise.all([
+      this.db
+        .selectFrom('accounts')
+        .select((eb) => eb.fn.count<string>('id').as('total'))
+        .executeTakeFirst(),
+      this.db
+        .selectFrom('accounts')
+        .selectAll()
+        .orderBy('created_at', 'desc')
+        .orderBy('id', 'desc')
+        .limit(limit)
+        .offset(offset)
+        .execute(),
+    ]);
+
+    const total = countResult ? Number(countResult.total) : 0;
+
+    return {
+      items: rows.map(toAccountDto),
+      meta: buildPaginationMeta(total, page, limit),
+    };
   }
 }
