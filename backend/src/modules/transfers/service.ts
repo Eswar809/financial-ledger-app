@@ -60,7 +60,6 @@ export class TransfersService {
         }
 
         const fromAcc = data.from_account_id === firstAcc.id ? firstAcc : secondAcc;
-        const toAcc = data.to_account_id === firstAcc.id ? firstAcc : secondAcc;
 
         // 3. Pre-check / insert transfer row as the global idempotency anchor
         // ON CONFLICT (reference_id) DO NOTHING ensures we don't abort the pg transaction immediately

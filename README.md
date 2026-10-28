@@ -132,10 +132,20 @@ All endpoints return uniform response envelopes:
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/api/v1/accounts` | Create account (`{ name, initial_balance? }`) |
-| `GET` | `/api/v1/accounts` | List accounts |
+| `GET` | `/api/v1/accounts` | Paginated accounts list (`page`, `limit`) |
 | `GET` | `/api/v1/accounts/:id` | Get account details |
-| `GET` | `/api/v1/accounts/:id/transactions` | Paginated transactions (`page`, `limit`, `type`) |
+| `GET` | `/api/v1/accounts/:id/transactions` | Paginated ledger entries, latest-first (`page`, `limit`, `type`) |
 | `POST` | `/api/v1/transactions` | Execute credit or debit (`{ account_id, type, amount, reference_id }`) |
+| `GET` | `/api/v1/transactions` | Paginated ledger entries across accounts (`account_id`, `type`, `page`, `limit`) |
 | `POST` | `/api/v1/transfers` | Atomic transfer (`{ from_account_id, to_account_id, amount, reference_id }`) |
 | `GET` | `/health/ready` | Readiness probe (database connection verification) |
 | `GET` | `/docs` | OpenAPI Swagger UI |
+
+---
+
+## 📚 Documentation
+
+- **[API Documentation](docs/API.md)** — endpoints, request/response examples, error codes, pagination, and integrity guarantees.
+- **[Assumptions & Design Decisions](docs/ASSUMPTIONS.md)** — choices made where the brief left details open.
+- **[Architectural Design](docs/DESIGN.md)** — domain invariants, concurrency protocol, and money representation.
+- **Interactive docs** — Swagger UI at `/docs`; raw OpenAPI 3.1 specification at `/openapi.json`.

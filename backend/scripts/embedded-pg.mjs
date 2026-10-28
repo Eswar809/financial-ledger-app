@@ -27,9 +27,15 @@ async function clearStaleServer() {
         process.kill(pid, 'SIGKILL');
       }
       await sleep(1500);
-    } catch {}
+    } catch {
+      // process already gone
+    }
   }
-  try { fs.unlinkSync(pidFile); } catch {}
+  try {
+    fs.unlinkSync(pidFile);
+  } catch {
+    // already removed
+  }
 }
 
 async function run() {
@@ -59,7 +65,7 @@ async function run() {
   try {
     await pg.createDatabase(DB);
     console.log(`Created database "${DB}"`);
-  } catch (err) {
+  } catch {
     console.log(`Database "${DB}" ready.`);
   }
 

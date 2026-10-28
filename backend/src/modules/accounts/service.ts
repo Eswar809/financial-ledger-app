@@ -1,4 +1,4 @@
-import { Kysely, sql } from 'kysely';
+import { Kysely } from 'kysely';
 import type { Database } from '../../db/schema.js';
 import { NotFoundError } from '../../lib/errors.js';
 import { buildPaginationMeta, type PaginatedResult } from '../../lib/pagination.js';

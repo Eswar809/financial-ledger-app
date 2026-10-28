@@ -54,6 +54,55 @@ describe('Pagination & OpenAPI Smoke', () => {
     expect(body.meta.total_pages).toBe(4);
   });
 
+  it('returns transactions latest-first by created_at', async () => {
+    const res = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/v1/accounts/${accountId}/transactions?limit=100`,
+    });
+
+    expect(res.statusCode).toBe(200);
+    const timestamps = res.json().data.map((tx: any) => new Date(tx.created_at).getTime());
+    for (let i = 1; i < timestamps.length; i++) {
+      expect(timestamps[i - 1]).toBeGreaterThanOrEqual(timestamps[i]);
+    }
+  });
+
+  it('paginates the accounts list with accurate meta', async () => {
+    for (let i = 0; i < 4; i++) {
+      await ctx.app.inject({
+        method: 'POST',
+        url: '/api/v1/accounts',
+        payload: { name: `Paged Account ${i}` },
+      });
+    }
+
+    const res = await ctx.app.inject({ method: 'GET', url: '/api/v1/accounts?page=2&limit=2' });
+
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.data.length).toBe(2);
+    expect(body.meta).toEqual({ total: 5, page: 2, limit: 2, total_pages: 3 });
+  });
+
+  it('rejects invalid pagination parameters with 400 VALIDATION_ERROR', async () => {
+    const urls = [
+      `/api/v1/accounts/${accountId}/transactions?page=0`,
+      `/api/v1/accounts/${accountId}/transactions?page=abc`,
+      `/api/v1/accounts/${accountId}/transactions?limit=0`,
+      `/api/v1/accounts/${accountId}/transactions?limit=101`,
+      '/api/v1/accounts?page=0',
+      '/api/v1/accounts?limit=101',
+      '/api/v1/transactions?page=0',
+      '/api/v1/transactions?limit=101',
+    ];
+
+    for (const url of urls) {
+      const res = await ctx.app.inject({ method: 'GET', url });
+      expect(res.statusCode, url).toBe(400);
+      expect(res.json().error.code, url).toBe('VALIDATION_ERROR');
+    }
+  });
+
   it('serves OpenAPI 3.1 specification at /openapi.json', async () => {
     const res = await ctx.app.inject({
       method: 'GET',

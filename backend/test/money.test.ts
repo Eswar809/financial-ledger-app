@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  addMoney,
-  compareMoney,
-  formatMoney,
-  parseMoney,
-  subMoney,
-} from '../src/lib/money.js';
+import { addMoney, compareMoney, parseMoney, subMoney } from '../src/lib/money.js';
 
 describe('Money utility functions', () => {
   describe('parseMoney', () => {

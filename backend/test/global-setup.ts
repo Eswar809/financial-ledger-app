@@ -1,5 +1,4 @@
 import EmbeddedPostgres from 'embedded-postgres';
-import fs from 'fs';
 import path from 'path';
 import pg from 'pg';
 import { fileURLToPath } from 'url';
@@ -27,7 +26,9 @@ async function canConnect(connectionString: string): Promise<boolean> {
   } catch {
     try {
       await client.end();
-    } catch {}
+    } catch {
+      // connection already closed
+    }
     return false;
   }
 }
@@ -50,7 +51,7 @@ export default async function setup() {
 
     try {
       await embeddedPg.initialise();
-    } catch (err: any) {
+    } catch {
       // already initialised is fine
     }
 

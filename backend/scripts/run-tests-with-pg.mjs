@@ -42,7 +42,9 @@ async function clearStaleServer() {
   }
   try {
     fs.unlinkSync(pidFile);
-  } catch {}
+  } catch {
+    // already removed
+  }
 }
 
 async function canConnect(url) {
@@ -55,7 +57,9 @@ async function canConnect(url) {
   } catch {
     try {
       await client.end();
-    } catch {}
+    } catch {
+      // connection already closed
+    }
     return false;
   }
 }
@@ -78,13 +82,17 @@ async function main() {
 
     try {
       await pgInstance.initialise();
-    } catch {}
+    } catch {
+      // already initialised
+    }
 
     await pgInstance.start();
 
     try {
       await pgInstance.createDatabase(DB);
-    } catch {}
+    } catch {
+      // already exists
+    }
     console.log('Embedded test PostgreSQL is ready.');
   } else {
     console.log(`PostgreSQL already active on port ${PORT}.`);

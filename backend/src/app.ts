@@ -6,7 +6,6 @@ import {
   jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
-  type ZodTypeProvider,
 } from 'fastify-type-provider-zod';
 import type { Kysely } from 'kysely';
 import pg from 'pg';
